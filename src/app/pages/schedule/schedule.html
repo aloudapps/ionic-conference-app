@@ -25,7 +25,7 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-calendar [(ngModel)]="selectDate" (change)="changeDay($event)" [format]="'YYYY-MM-DD'" [options]="calOptions">
+  <ion-calendar #scheduleCalendar [(ngModel)]="selectDate" (monthChange)="changeMonth($event)" (change)="changeDay($event)" [format]="'YYYY-MM-DD'" [options]="calOptions">
   </ion-calendar>
 </ion-content>
 <ion-content>

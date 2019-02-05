@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, OnInit, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, IonList, LoadingController, ModalController, ToastController } from '@ionic/angular';
 
@@ -6,7 +6,7 @@ import { ScheduleFilterPage } from '../schedule-filter/schedule-filter';
 import { ConferenceData } from '../../providers/conference-data';
 import { UserData } from '../../providers/user-data';
 import { map } from 'rxjs/operators';
-import { CalendarComponentOptions, DayConfig, DefaultDate } from 'ion2-calendar';
+import { CalendarComponentOptions, DayConfig, CalendarComponent, CalendarComponentPayloadTypes, CalendarDay } from 'ion2-calendar';
 import * as moment from 'moment';
 
 @Component({
@@ -14,9 +14,10 @@ import * as moment from 'moment';
   templateUrl: 'schedule.html',
   styleUrls: ['./schedule.scss'],
 })
-export class SchedulePage implements OnInit {
+export class SchedulePage implements OnInit, AfterViewInit {
   // Gets a reference to the list element
   @ViewChild('scheduleList') scheduleList: IonList;
+  @ViewChild('scheduleCalendar', {read: ElementRef}) calendar: ElementRef;
 
   queryText = '';
   segment = 'all';
@@ -41,14 +42,33 @@ export class SchedulePage implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log(this.calendar);
     // this.app.setTitle('Schedule');
     this.findFirstSchedueDay();
   }
 
+  ngAfterViewInit() {
+    this.removeTodaySelection();
+  }
+
+  removeTodaySelection() {
+    this.calendar.nativeElement.querySelectorAll('button').forEach((elem: any) => {
+      if (elem.classList.contains('today')) {
+        console.log(elem);
+        elem.classList.remove('today');
+      }
+    });
+  }
+
   findFirstSchedueDay() {
+    this.daysConfig.push({
+      date: moment('2019-02-05', 'YYYY-MM-DD').toDate(),
+      marked: true,
+      cssClass: 'plain'
+    });
     this.confData.load().pipe().subscribe((data: any) => {
       this.selectDate = data.schedule[0].date;
-      data.schedule.forEach((v) => {
+      data.schedule.forEach((v: any) => {
         this.daysConfig.push({
           date: moment(v.date, 'YYYY-MM-DD').toDate(),
           marked: true
@@ -60,6 +80,11 @@ export class SchedulePage implements OnInit {
 
   changeDay($event) {
     this.updateSchedule($event);
+  }
+
+  changeMonth() {
+    console.log('aaaaaa');
+    this.removeTodaySelection();
   }
 
   updateSchedule(date: string = this.selectDate) {
